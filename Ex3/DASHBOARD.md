@@ -28,7 +28,7 @@ Idea para layout:
 >   | % de CPU de replicas     |  | % de RAM de replicas   |
 >   ----------------------------  --------------------------
 
-En donde a simple vista el error rate mas reciente queda cerca de la latencia, replicas fail y saturacion de ram para facilitar el identificar lo critico y se agrega replicas activas, volumen de red y uso de CPU a la izquierda como data adicional para dar contexto rapido de toda la situacion. replicas pending lo agrego porque da pista sobre un posibe origen en nodo y no en el servicio, ademas de avisar si es garantia que se esta degradando el sistema al ver el numero crecer junto a los graficos empeorando.
+En donde a simple vista el error rate mas reciente queda cerca de la latencia, replicas fail y saturacion de ram para facilitar el identificar lo critico y se agrega replicas activas, volumen de red y uso de CPU a la izquierda como data adicional para dar contexto rapido de toda la situacion. replicas pending lo agrego porque da pista sobre un posible origen en nodo y no en el servicio, ademas de avisar si es garantia que se esta degradando el sistema al ver el numero crecer junto a los graficos empeorando.
 
 ## Alertas
 
