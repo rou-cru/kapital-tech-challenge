@@ -25,7 +25,7 @@ El resultado del ejercicio 1 fue probado y confirmado como funcional tanto para 
 
 ### Implementacion de Inferencia
 
-- Para cumplir con varios de los requisitos se implemento un script de entrenamiento por RandomForest y el clasico dataset "Iris" disponible en Kagle, con lo que se puede generar un modelo y regenerarlo para pruebas.
+- Para cumplir con varios de los requisitos se implemento un script de entrenamiento por RandomForest y el clasico dataset "Iris" disponible en Kaggle, con lo que se puede generar un modelo y regenerarlo para pruebas.
 - Tambien este usa el modelo para cargar en el API de inferencia, permitiendo un suite de UTs con pytest que realice asserts sobre la inferencia.
 - La inferencia se ejecuta sobre una entrada del dataset, no es una inferencia real pero garantiza determinismo para las implementacion y aporta realismo del concepto.
 
