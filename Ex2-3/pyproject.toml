@@ -1,0 +1,17 @@
+[project]
+name = "ex2-3"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas==2.3.3",
+    "scikit-learn==1.8.0",
+    "joblib==1.5.3",
+    "prometheus_client==0.24.1",
+    "pytest==8.3.5",
+    "httpx==0.28.1",
+    "fastapi==0.128.0",
+    "uvicorn==0.40.0",
+]
+
+[tool.setuptools]
+packages = ["app"]
