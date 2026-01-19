@@ -6,6 +6,12 @@ from botocore.exceptions import ClientError
 
 
 def fail(message: str) -> None:
+    """
+    Exit the program after printing an error message prefixed with "ERROR: ".
+    
+    Parameters:
+        message (str): The error message to print before terminating the process.
+    """
     print(f"ERROR: {message}")
     sys.exit(1)
 

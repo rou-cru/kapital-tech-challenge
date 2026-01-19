@@ -11,6 +11,11 @@ model = None
 # -------------------- Readiness ----------------------- #
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Manage the application's lifespan by loading the Iris model into the module-level `model` variable at startup.
+    
+    Loads the model from "models/iris_model.joblib" and assigns it to the global `model` before yielding control to the application.
+    """
     global model
     model = joblib.load("models/iris_model.joblib")
     yield
@@ -18,6 +23,12 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/ready")
 def ready():
+    """
+    Report service readiness based on whether the ML model has been loaded.
+    
+    Returns:
+        If the global model is loaded, `{"status": "ready"}`; otherwise an HTTP 503 JSONResponse with `{"status": "not_ready"}`.
+    """
     if model is not None:
         return {"status": "ready"}
     return JSONResponse(status_code=503, content={"status": "not_ready"})
@@ -44,6 +55,15 @@ class IrisInput(BaseModel):
 
 @app.post("/predict")
 def predict(data: IrisInput):
+    """
+    Predict the iris species from sepal and petal measurements.
+    
+    Parameters:
+        data (IrisInput): Measurements with fields `sepalLength`, `sepalWidth`, `petalLength`, and `petalWidth`.
+    
+    Returns:
+        dict: {"species": <predicted species>} where <predicted species> is the model's predicted class label.
+    """
     with PREDICTION_LATENCY.time():
         try:
             features = pd.DataFrame([[

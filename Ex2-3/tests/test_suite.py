@@ -21,6 +21,14 @@ with open(GOLDEN_PATH) as file:
 # el readiness de Prometheus cuando se usa en pytest
 @pytest.fixture(scope="module")
 def client():
+    """
+    Provide a TestClient configured for the FastAPI app for use in tests.
+    
+    Yields a TestClient instance and ensures the client is closed after use.
+    
+    Returns:
+        TestClient: A TestClient instance for interacting with the FastAPI application.
+    """
     with TestClient(app) as c:
         yield c
 
