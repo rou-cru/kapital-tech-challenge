@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
+  "packages": [
+    "terraform@1.14.3",
+    "awscli2@2.32.15",
+    "terraform-local@0.24.1",
+    "python312@3.12.12",
+    "uv@0.9.24",
+    "python312Packages.numpy@2.3.4",
+    "actionlint@latest",
+    "checkov@latest"
+  ],
+  "env": {
+    "AWS_ACCESS_KEY_ID": "test",
+    "AWS_SECRET_ACCESS_KEY": "test",
+    "AWS_DEFAULT_REGION": "us-east-1",
+    "AWS_ENDPOINT_URL": "http://127.0.0.1:4566",
+    "TF_VAR_region": "us-east-1"
+  },
+  "shell": {
+    "init_hook": [
+      "uv sync",
+      "cp uv.lock Ex2-3/uv.lock",
+      "terraform -chdir=Ex1 init"
+    ],
+    "scripts": {
+      "test1": [
+        "tflocal apply -target=bucket.tf -auto-approve",
+        "uv run python validate_bucket.py \"$(tflocal output -raw bucketName)\""
+      ],
+      "test2": [
+        "cd Ex2-3 && uv run python training/train.py && uv run pytest tests/ -v"
+      ]
+    }
+  }
+}

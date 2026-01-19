@@ -1,0 +1,119 @@
+name: Ex2-3 CI
+on:
+  push:
+    paths:
+      - 'Ex2-3/**'
+  pull_request:
+    paths:
+      - 'Ex2-3/**'
+permissions:
+  contents: read
+  pull-requests: read
+defaults:
+  run:
+    working-directory: Ex2-3
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      tests: ${{ steps.filter.outputs.tests }}
+      build: ${{ steps.filter.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            tests:
+              - 'Ex2-3/tests/**'
+              - 'Ex2-3/models/**'
+              - 'Ex2-3/app/**'
+              - 'Ex2-3/pyproject.toml'
+            build:
+              - 'Ex2-3/models/**'
+              - 'Ex2-3/app/**'
+              - 'Ex2-3/pyproject.toml'
+              - 'Ex2-3/Dockerfile'
+
+  tests:
+    needs: changes
+    if: needs.changes.outputs.tests == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            Ex2-3/uv.lock
+            Ex2-3/pyproject.toml
+      - name: Install dependencies
+        run: uv sync
+      - name: Run Tests
+        run: uv run pytest tests/
+  ## Analisis de Calidad podria ir aqui
+
+  build-and-verify:
+    needs: [changes, tests]
+    if: always() && needs.changes.outputs.build == 'true' && (needs.tests.result == 'success' || needs.tests.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+  # Data para etiquetado
+      - name: Get Model Metadata
+        id: model
+        run: |
+          {
+            echo "hash=$(sha256sum models/iris_model.joblib | cut -c1-8)"
+            echo "commit=$(git log -n 1 --pretty=format:%H -- models/iris_model.joblib)"
+          } >> "$GITHUB_OUTPUT"
+  # Build
+      - name: Build Docker Image
+        env:
+          TAG: ${{ steps.model.outputs.hash }}
+          COMMIT: ${{ steps.model.outputs.commit }}
+        run: docker build -t "ex2-3-app:$TAG" --label "model.commit=$COMMIT" .
+  ## Analisis de seguridad podria ir aqui
+    # Levantamos el contenedor para Smoke test
+      - name: Run Container
+        env:
+          TAG: ${{ steps.model.outputs.hash }}
+        run: docker run -d -p 8000:8000 --name app-container "ex2-3-app:$TAG"
+    # Cargar configuracion de pruebas
+      - name: Load Golden Data
+        id: golden
+        run: |
+          {
+            echo "readyEp=$(jq -r '.observability.readiness_endpoint' tests/golden_data.json)"
+            echo "metricsEp=$(jq -r '.observability.metrics_endpoint' tests/golden_data.json)"
+            echo "endpoint=$(jq -r '.inference.endpoint' tests/golden_data.json)"
+            echo "payload=$(jq -c '.inference.payload' tests/golden_data.json)"
+          } >> "$GITHUB_OUTPUT"
+    # Validar que esta funcionando el endpoint requerido para rollingRelease
+      - name: Verify Readiness
+        env:
+          TARGET_URL: "http://localhost:8000${{ steps.golden.outputs.readyEp }}"
+        run: curl --silent --fail --retry 10 --retry-delay 5 --retry-connrefused --retry-all-errors "$TARGET_URL" | jq -e '.status == "ready"'
+    # Smoke test para validar que el Dockerfile no afecto el comportamiento confirmado del source code
+      - name: Request Inference
+        env:
+          TARGET_URL: "http://localhost:8000${{ steps.golden.outputs.endpoint }}"
+          PAYLOAD: ${{ steps.golden.outputs.payload }}
+        run: curl --silent --fail --retry 10 --retry-delay 5 --retry-connrefused -X POST "$TARGET_URL" -H "Content-Type:application/json" -d "$PAYLOAD" -o response.json
+      - name: Verify Inference
+        run: jq -e ".species == \"$(jq -r '.inference.expected' tests/golden_data.json)\"" response.json
+    # Validar que esta funcionando la generacion de metricas compatible con Prometheus
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Verify Metrics
+        env:
+          LATENCY: prediction_latency_seconds
+          COUNT_INFERENCE: prediction_count
+          TARGET_URL: "http://localhost:8000${{ steps.golden.outputs.metricsEp }}"
+        run: uv run --with prometheus_client python ../.github/scripts/validate_metrics.py "$TARGET_URL" "$LATENCY" "$COUNT_INFERENCE"
+  ## Se podria agregar Sign de la imagen aqui
+  # Push al Registry como paso final del pipeline aqui

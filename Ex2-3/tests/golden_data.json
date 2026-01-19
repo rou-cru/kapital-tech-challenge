@@ -1,0 +1,22 @@
+{
+  "inference": {
+    "endpoint": "/predict",
+    "payload": {
+      "sepalLength": 5.1,
+      "sepalWidth": 3.5,
+      "petalLength": 1.4,
+      "petalWidth": 0.2
+    },
+    "key": "species",
+    "expected": "Iris-setosa",
+    "domain": [
+      "Iris-setosa",
+      "Iris-versicolor",
+      "Iris-virginica"
+    ]
+  },
+  "observability": {
+    "metrics_endpoint": "/metrics",
+    "readiness_endpoint": "/ready"
+  }
+}

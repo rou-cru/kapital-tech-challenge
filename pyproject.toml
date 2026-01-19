@@ -1,0 +1,15 @@
+[project]
+name = "kapital-tech-challenge"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "ex1",
+    "ex2-3",
+]
+
+[tool.uv.workspace]
+members = ["Ex1", "Ex2-3"]
+
+[tool.uv.sources]
+ex1 = { workspace = true }
+ex2-3 = { workspace = true }
