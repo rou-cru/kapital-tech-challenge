@@ -7,6 +7,7 @@
 3. Se recreo un proyecto de inferencia minimalista para mantener realismo en las implementaciones solicitadas, no se espera que genuinamente pueda inferir fuera del dataset de entrenamiento.
 4. Dada la indicacion de logica sobre ejecucion real, se uso LLMs para parte de la implementacion de FastAPI, particularmente con un bug que aparecio tras agregar prometheus_client y tratar de ejecutar UTs. No se uso para redacciones, diseño y tampoco se dejo implementaciones libres sin verificacion.
 5. Se realizaron agregados a los requerimientos originales para tratar de lograr un diseño parecido a lo que realmente se haria para produccion, particularmente en el pipeline de GA
+6. Se uso Code Rabbit para revision final previo a entrega
 
 ## Ejercicio 1: Infraestructura y Seguridad
 
