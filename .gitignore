@@ -1,0 +1,6 @@
+Ex1/volume
+Ex1/.terraform
+.venv
+Ex2-3/tests/__pycache__
+Ex2-3/app/__pycache__
+Ex2-3/.pytest_cache
